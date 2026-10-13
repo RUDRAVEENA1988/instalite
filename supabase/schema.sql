@@ -55,8 +55,8 @@ alter table public.posts enable row level security;
 drop policy if exists "Posts are publicly readable" on public.posts;
 create policy "Posts are publicly readable" on public.posts for select using (true);
 drop policy if exists "Users can create their own posts" on public.posts;
-create policy "Users can create their own posts" on public.posts for insert
-  with check ((select auth.uid()) = user_id);
+create policy "Users can create their own posts" on public.posts for insert to authenticated
+  with check ((select auth.uid()) is not null and (select auth.uid()) = user_id);
 drop policy if exists "Posts cannot be updated" on public.posts;
 create policy "Posts cannot be updated" on public.posts for update using (false);
 drop policy if exists "Posts cannot be deleted" on public.posts;
