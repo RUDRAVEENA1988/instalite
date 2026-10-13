@@ -476,8 +476,11 @@ if (!configIsReady) {
       const username = (currentUser.user_metadata?.display_name || currentUser.email?.split('@')[0] || 'instalite-user').slice(0, 30);
 
       uploadStage = 'Supabase post creation';
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+      if (authError || !authData.user) throw authError || new Error('Your Supabase session expired. Sign in again.');
+
       const { error: postError } = await supabase.from('posts').insert({
-        user_id: currentUser.id,
+        user_id: authData.user.id,
         username,
         caption,
         image_url: imageUrl,
