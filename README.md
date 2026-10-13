@@ -146,6 +146,14 @@ The Emulator UI is available at <http://localhost:4000>. Emulator data is local 
 
 To use a real Supabase project instead, completing the first three steps above is only the client-config portion; the real project's Authentication, Postgres, Storage, and Security Rules must also be configured before live posting will work. Never commit service-account files, private keys, or other privileged credentials.
 
+### Fixing Storage row-level security errors
+
+If sharing a post reports `new row violates row-level security policy`, the image upload was rejected before the post row could be created. The upload policy is intentionally limited to authenticated users writing to `post-images` under `posts/{their-user-id}/...`; do not disable row-level security or make uploads public. If email confirmation is enabled, confirm the account and sign in before sharing: a newly created account without a Supabase session is not authenticated yet. If the error persists, inspect the active Storage INSERT policy in the SQL Editor for the same project configured in `.env` before changing policies. The setup script in `supabase/schema.sql` is safe to rerun; its Realtime publication step checks membership before adding `public.posts`.
+
+### Fixing signup email rate limits
+
+If signup displays `email rate limit exceeded` or an HTTP 429 response, Supabase is limiting email sends for the project; this is separate from image uploads and Storage policies. Stop repeating signup or confirmation requests and wait before trying again. If an account may already have been created, use **Sign in** instead. For ongoing development, configure a custom SMTP provider or review the project's Authentication email rate limits in the Supabase Dashboard. The app reports this as a signup email limit and does not try to bypass Supabase throttling.
+
 ## Data model
 
 Postgres collection `posts` contains documents with:
@@ -183,5 +191,3 @@ instalite/
 ## Workshop contribution ideas
 
 Good follow-up issues include likes, comments, saved posts, story playback, profile editing, and avatar uploads. These can build on the Supabase setup; include Security Rules and tests whenever an issue adds a new collection or changes what users may read or write.
-
-

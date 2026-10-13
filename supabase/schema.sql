@@ -41,4 +41,17 @@ create policy "Users can delete their own post images" on storage.objects
     and (storage.foldername(name))[2] = (select auth.uid()::text));
 
 alter table public.posts replica identity full;
-alter publication supabase_realtime add table public.posts;
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_publication_tables
+    where pubname = 'supabase_realtime'
+      and schemaname = 'public'
+      and tablename = 'posts'
+  ) then
+    alter publication supabase_realtime add table public.posts;
+  end if;
+end
+$$;
