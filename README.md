@@ -258,6 +258,8 @@ This connects the app to:
 - Storage emulator
 - Hosting emulator
 
+The Storage emulator returns image URLs from `http://127.0.0.1:9199`; the Firestore rules accept this local URL alongside production Storage URLs. Emulator URLs are local-only and should not be used by a hosted app.
+
 The Firebase UI is available at:
 
 ```text
@@ -266,22 +268,11 @@ http://localhost:4000
 
 This is the easiest way to develop the app locally without paying for or connecting to a real project.
 
-### 12. Understanding the demo config
+### 12. Understanding the emulator config
 
-The repo ships with placeholder values in `public/firebase-config.js`:
+`public/firebase-config.js` contains the Firebase web app configuration for non-emulator mode. When `?emulator=1` is present, the app uses the `demo-instalite` project ID and connects to the local emulators without replacing or editing that configuration file.
 
-```js
-export const firebaseConfig = {
-  apiKey: 'demo-api-key',
-  authDomain: 'localhost',
-  projectId: 'demo-instalite',
-  storageBucket: 'demo-instalite.firebasestorage.app',
-  messagingSenderId: '000000000000',
-  appId: '1:000000000000:web:demo',
-};
-```
-
-These values are intentionally fake. The frontend detects the demo config and disables real Firebase initialization unless you are explicitly using the emulator mode.
+Without `?emulator=1`, the app connects to the Firebase project configured in `public/firebase-config.js`.
 
 ### 13. Important security reminders
 

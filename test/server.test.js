@@ -55,6 +55,7 @@ test('Firebase rules require authenticated post creation and owner-scoped photo 
 
   assert.match(firestoreRules, /allow read: if true/);
   assert.match(firestoreRules, /request\.auth\.uid/);
+  assert.match(firestoreRules, /http:\/\/127\\\\\.0\\\\\.0\\\\\.1:9199\/v0\/b\//);
   assert.match(firestoreRules, /allow update, delete: if false/);
   assert.match(storageRules, /request\.auth\.uid == userId/);
   assert.match(storageRules, /request\.resource\.size <= 5 \* 1024 \* 1024/);

@@ -3,3 +3,5 @@ npm-debug.log*
 .env
 public/uploads/*
 .firebaserc
+firestore-debug.log
+firebase-debug.log
