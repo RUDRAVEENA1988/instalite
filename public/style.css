@@ -879,6 +879,16 @@ a.navigation__link:hover,
   font-size: 11px;
 }
 
+.auth-mode-toggle {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--pink-dark);
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+}
+
 .upload-dropzone {
   position: relative;
   min-height: 148px;

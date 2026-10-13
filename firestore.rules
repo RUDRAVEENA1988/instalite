@@ -1,0 +1,39 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /posts/{postId} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasAll([
+          'userId',
+          'username',
+          'caption',
+          'imageUrl',
+          'imagePath',
+          'timestamp'
+        ])
+        && request.resource.data.keys().hasOnly([
+          'userId',
+          'username',
+          'caption',
+          'imageUrl',
+          'imagePath',
+          'timestamp'
+        ])
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.username is string
+        && request.resource.data.username.size() > 0
+        && request.resource.data.username.size() <= 30
+        && request.resource.data.caption is string
+        && request.resource.data.caption.size() > 0
+        && request.resource.data.caption.size() <= 500
+        && request.resource.data.imageUrl is string
+        && request.resource.data.imageUrl.matches('https://firebasestorage.googleapis.com/.*')
+        && request.resource.data.imagePath is string
+        && request.resource.data.imagePath.matches('posts/' + request.auth.uid + '/[^/]+')
+        && request.resource.data.timestamp == request.time;
+      allow update, delete: if false;
+    }
+  }
+}

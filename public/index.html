@@ -8,7 +8,7 @@
     <title>InstaLite — A little life, shared.</title>
     <link rel="preconnect" href="https://images.unsplash.com">
     <link rel="stylesheet" href="/style.css">
-    <script src="/script.js" defer></script>
+    <script type="module" src="/firebase-app.js"></script>
   </head>
   <body>
     <div class="app-shell">
@@ -46,9 +46,9 @@
             <span>Create post</span>
             <span class="navigation__soon">New</span>
           </button>
-          <button class="navigation__link navigation__profile" type="button" disabled title="Profile pages are coming soon">
+          <button class="navigation__link navigation__profile" id="auth-button" type="button">
             <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=96&h=96&q=80" alt="" width="26" height="26">
-            <span>Profile</span>
+            <span>Sign in</span>
           </button>
         </nav>
 
@@ -123,8 +123,8 @@
         <section class="current-profile" aria-label="Your profile">
           <img class="avatar avatar--large" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&h=120&q=80" alt="" width="48" height="48">
           <div class="current-profile__identity">
-            <strong>your.name</strong>
-            <span>Your little corner of the internet</span>
+            <strong id="profile-username">your.name</strong>
+            <span id="profile-subtitle">Sign in to share a moment</span>
           </div>
           <span class="online-dot" aria-label="Online"></span>
         </section>
@@ -175,11 +175,41 @@
         <button class="mobile-navigation__link" type="button" disabled aria-label="Notifications (coming soon)">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 22h4"/></svg>
         </button>
-        <button class="mobile-navigation__link" type="button" disabled aria-label="Profile (coming soon)">
+        <button class="mobile-navigation__link" id="open-auth-mobile" type="button" aria-label="Sign in">
           <img class="avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=96&h=96&q=80" alt="" width="27" height="27">
         </button>
       </nav>
     </div>
+
+    <dialog class="create-dialog" id="auth-dialog" aria-labelledby="auth-dialog-title">
+      <form class="create-form" id="auth-form">
+        <header class="create-form__header">
+          <div>
+            <p class="eyebrow">YOUR LITTLE CORNER</p>
+            <h2 id="auth-dialog-title">Sign in</h2>
+          </div>
+          <button class="create-form__close" id="close-auth" type="button" aria-label="Close sign-in dialog">×</button>
+        </header>
+
+        <div id="auth-username-field" hidden>
+          <label class="create-form__label" for="auth-username">Display name</label>
+          <input class="create-form__input" id="auth-username" name="displayName" type="text" maxlength="30" autocomplete="nickname">
+        </div>
+
+        <label class="create-form__label" for="auth-email">Email</label>
+        <input class="create-form__input" id="auth-email" name="email" type="email" autocomplete="email" required>
+
+        <label class="create-form__label" for="auth-password">Password</label>
+        <input class="create-form__input" id="auth-password" name="password" type="password" minlength="6" autocomplete="current-password" required>
+
+        <p class="create-form__feedback" id="auth-feedback" role="status" aria-live="polite"></p>
+        <button class="create-form__submit" id="submit-auth" type="submit">Sign in</button>
+        <p class="create-form__hint">
+          <span id="auth-mode-hint">New here?</span>
+          <button class="auth-mode-toggle" id="toggle-auth-mode" type="button">Create an account</button>
+        </p>
+      </form>
+    </dialog>
 
     <dialog class="create-dialog" id="create-dialog" aria-labelledby="create-dialog-title">
       <form class="create-form" id="create-post-form">
@@ -190,9 +220,6 @@
           </div>
           <button class="create-form__close" id="close-create-post" type="button" aria-label="Close create post dialog">×</button>
         </header>
-
-        <label class="create-form__label" for="post-username">Username</label>
-        <input class="create-form__input" id="post-username" name="username" type="text" maxlength="30" autocomplete="username" placeholder="e.g. ava.morgan" required>
 
         <span class="create-form__label">Photo</span>
         <label class="upload-dropzone" id="upload-dropzone" for="post-image" tabindex="0">

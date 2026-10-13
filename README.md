@@ -1,114 +1,124 @@
 # InstaLite
 
-InstaLite is a beginner-friendly, Instagram-inspired photo-sharing application built to demonstrate how a browser frontend communicates with a Node.js backend through REST APIs.
-
-## Purpose
-
-This hands-on GitHub workshop project provides a small, understandable starting point for learning how to serve a web page and exchange JSON data between a frontend and an Express server.
+InstaLite is a beginner-friendly, Instagram-inspired photo-sharing app for learning frontend development, Firebase, and open-source collaboration.
 
 ## Features
 
-- Responsive, Instagram-inspired interface with navigation, story circles, suggested profiles, and a photo feed.
-- Express serves the project frontend from `public/`.
-- The browser fetches post data from `GET /api/posts` and builds the feed dynamically.
-- Loading, empty, and error states are shown in the feed.
-- Three sample posts demonstrate the feed; posts are kept in an in-memory JavaScript array.
-- A create-post dialog uploads a JPEG, PNG, or WebP image alongside a username and caption.
-- Uploaded images are limited to 5 MB and previewed before submission; drag and drop is supported.
-- The server validates new posts, assigns an ID and timestamp, and returns them with HTTP 201.
-- Successful posts appear at the top of the feed without a page reload.
-- Multer stores uploads in `public/uploads/` under generated filenames after image-signature validation.
-- Likes, comments, profile links, and stories are illustrative interface elements, not interactive features.
+- Responsive Instagram-inspired interface with sample story circles and a live photo feed.
+- Firebase Authentication with email/password sign-up and sign-in.
+- Firestore stores shared post metadata and updates the feed in real time.
+- Firebase Storage stores JPEG, PNG, and WebP photos (up to 5 MB).
+- Firestore and Storage Security Rules require sign-in to create posts and scope uploads to their owner.
+- Firebase Emulator Suite configuration for local development without a real Firebase project.
+- Express serves the app locally; Firebase Hosting can host the same static frontend.
+- Likes, comments, saved posts, story playback, and editable profiles are not implemented yet.
 
 ## Technology stack
 
-- HTML5, CSS3, and vanilla JavaScript
-- Node.js and Express.js
-- REST APIs using HTTP GET and POST
-- In-memory JavaScript array; no database
+- HTML, CSS, and vanilla JavaScript modules
+- Node.js and Express for local static hosting
+- Firebase Authentication, Cloud Firestore, Cloud Storage, and Firebase Hosting
+- Firebase Local Emulator Suite for local development
+
+## Requirements
+
+- Node.js 20 or newer
+- npm
+- Java (required by the Firebase emulators)
+
+## Install and run with local emulators
+
+Install the Node dependencies:
+
+```bash
+npm install
+```
+
+Start the Firebase emulators in one terminal:
+
+```bash
+npm run emulators
+```
+
+The first emulator run may download emulator binaries. In another terminal, serve the app:
+
+```bash
+npm start
+```
+
+Open <http://localhost:3000/?emulator=1>. The `emulator=1` query parameter connects the app to the local Auth, Firestore, and Storage emulators using the demo project `demo-instalite`. Do not use this parameter against production.
+
+The Emulator UI is available at <http://localhost:4000>. Emulator data is local and disposable; it is not copied into a Firebase project.
+
+Run the tests with:
+
+```bash
+npm test
+```
+
+## Connect a Firebase project
+
+To use a real Firebase project:
+
+1. Create a Firebase project in the [Firebase Console](https://console.firebase.google.com/).
+2. Register a Web app in that project and copy its Firebase configuration object.
+3. Replace the demo values in `public/firebase-config.js` with the values from the Web app config.
+4. In **Authentication → Sign-in method**, enable **Email/Password**.
+5. Create a **Cloud Firestore** database.
+6. Create the **Cloud Storage** bucket.
+7. Install/login to the Firebase CLI and associate this checkout with your project:
+
+   ```bash
+   npx firebase-tools login
+   npx firebase-tools use --add
+   ```
+
+8. Deploy the included Firestore and Storage rules before sharing the app:
+
+   ```bash
+   npx firebase-tools deploy --only firestore:rules,storage
+   ```
+
+Then run `npm start` and open <http://localhost:3000/> **without** `?emulator=1`.
+
+The web app configuration is public client configuration, not a server secret. Do not put a service-account JSON file, private key, or Admin SDK credentials in this repository. Access control is enforced by the included Security Rules, not by hiding the web config. Review the rules before changing them; posts and uploaded images are publicly readable, while creating a post/photo requires an authenticated user.
+
+For local-only work, the `demo-instalite` project configuration is prefilled. The emulator rules are the same checked-in rules used for deployment.
+
+## Data model
+
+Firestore collection `posts` contains documents with:
+
+```text
+userId       Firebase Auth UID of the author
+username     Author display name
+caption      Post caption (up to 500 characters)
+imageUrl     Firebase Storage download URL
+imagePath    Storage path: posts/{userId}/{generated-filename}
+timestamp    Firestore server timestamp
+```
+
+Photos are stored under `posts/{userId}/{generated-filename}`. Storage Rules limit uploads to the authenticated owner's folder, supported image MIME types, and 5 MB. Firestore Rules allow public feed reads and authenticated post creation only; post edits and deletes are disabled in this starter.
 
 ## Project structure
 
 ```text
 instalite/
 ├── public/
-│   ├── index.html   # Page structure
-│   ├── style.css    # Responsive styles
-│   ├── script.js    # Fetches the feed and submits new posts
-│   └── uploads/     # Created automatically for uploaded photos
-├── server.js        # Express server and REST API
-├── package.json     # Project metadata and dependencies
-├── package-lock.json
-├── test/
-│   └── server.test.js # REST API tests
-├── .gitignore
-└── README.md
+│   ├── index.html
+│   ├── style.css
+│   ├── firebase-app.js
+│   └── firebase-config.js
+├── firestore.rules
+├── storage.rules
+├── firebase.json
+├── firestore.indexes.json
+├── server.js
+├── package.json
+└── test/
+    └── server.test.js
 ```
 
-## Installation and setup
+## Workshop contribution ideas
 
-Install [Node.js](https://nodejs.org/) (which includes npm), then open a terminal in the project directory and install the dependencies:
-
-```bash
-npm install
-```
-
-## Run the application
-
-Start the Express server:
-
-```bash
-npm start
-```
-
-The server listens at <http://localhost:3000> by default. Set the `PORT` environment variable to use a different port.
-
-Run the REST API tests in a separate terminal with:
-
-```bash
-npm test
-```
-
-## REST API
-
-### `GET /api/posts`
-
-Returns all posts as a JSON array. The initial response contains three sample posts.
-
-Example:
-
-```bash
-curl http://localhost:3000/api/posts
-```
-
-Each post object includes `id`, `username`, `avatarUrl`, `imageUrl`, `caption`, `timestamp`, and `likes`.
-
-### `POST /api/posts`
-
-Creates a post using a photo upload. `username`, `caption`, and one image file are required. The username is limited to 30 characters and the caption to 500 characters.
-
-Example:
-
-```bash
-curl -X POST http://localhost:3000/api/posts \
-  -F "username=ava.morgan" \
-  -F "caption=A little moment worth keeping." \
-  -F "image=@./photo.jpg"
-```
-
-Send `multipart/form-data` with the fields `username`, `caption`, and `image` (one file). Accepted image types are JPEG, PNG, and WebP; each image must be 5 MB or smaller. The server checks the uploaded MIME type and file signature, generates the stored filename, and serves the resulting image at `/uploads/<generated-name>`.
-
-A successful request returns HTTP `201 Created` and the created post, including its generated `id`, `imageUrl`, ISO 8601 `timestamp`, sample `avatarUrl`, and initial `likes` count of `0`. Invalid fields and unsupported images return a JSON `error` message; oversized uploads return HTTP `413`.
-
-## Current limitations
-
-- Post metadata is stored only in memory. User-created posts are lost when the server restarts; the three sample posts are reloaded at startup.
-- Uploaded image files are stored locally in `public/uploads/`. They may remain on a local machine after a restart, but local filesystem uploads and in-memory metadata are not production-persistent and can be lost on deployment, instance replacement, or restart.
-- The server accepts JPEG, PNG, and WebP images up to 5 MB each. It does not resize or otherwise transform uploaded photos.
-- Likes, comments, story links, profile links, and suggestions are illustrative interface elements, not interactive features.
-- There is no authentication, database, or cloud image storage.
-- Future improvements may include working likes and comments, user authentication, durable image and metadata storage, profiles and following, pagination, and search.
-
-## GitHub workshop
-
-The learner is responsible for creating the GitHub repository, committing this README, and opening a GitHub issue to track the planned like or comment feature. These GitHub actions are intentionally not performed automatically.
+Good follow-up issues include likes, comments, saved posts, story playback, profile editing, and avatar uploads. These can build on the Firebase setup; include Security Rules and tests whenever an issue adds a new collection or changes what users may read or write.

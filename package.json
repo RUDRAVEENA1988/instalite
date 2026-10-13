@@ -5,10 +5,11 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "emulators": "npx firebase-tools emulators:start --project demo-instalite",
+    "deploy": "npx firebase-tools deploy --only hosting,firestore:rules,storage",
     "test": "node --test"
   },
   "dependencies": {
-    "express": "^5.1.0",
-    "multer": "^2.4.0"
+    "express": "^5.1.0"
   }
 }
