@@ -526,13 +526,17 @@ if (!configIsReady && !useEmulators) {
     const imagePath = `posts/${currentUser.uid}/${crypto.randomUUID()}.${extension}`;
     const imageRef = ref(storage, imagePath);
     let imageUploaded = false;
+    let uploadStage = 'Authentication token refresh';
 
     try {
+      await currentUser.getIdToken(true);
+      uploadStage = 'Storage photo upload';
       await uploadBytes(imageRef, image, { contentType: image.type });
       imageUploaded = true;
       const imageUrl = await getDownloadURL(imageRef);
       const username = (currentUser.displayName || currentUser.email?.split('@')[0] || 'instalite-user').slice(0, 30);
 
+      uploadStage = 'Firestore post creation';
       await addDoc(collection(db, 'posts'), {
         userId: currentUser.uid,
         username,
@@ -556,7 +560,14 @@ if (!configIsReady && !useEmulators) {
       }
 
       console.error('Unable to upload an InstaLite post:', error);
-      createPostFeedback.textContent = error.message || 'Your photo could not be uploaded. Please try again.';
+      const serviceName = uploadStage === 'Authentication token refresh'
+        ? 'Firebase Authentication'
+        : uploadStage.startsWith('Storage')
+          ? 'Firebase Storage'
+          : 'Cloud Firestore';
+      createPostFeedback.textContent = error.code === 'permission-denied'
+        ? `${uploadStage} was denied. Sign in again and check that ${serviceName} is configured and its rules allow authenticated users.`
+        : error.message || 'Your photo could not be uploaded. Please try again.';
     } finally {
       submitButton.disabled = false;
       submitButton.textContent = 'Share post';

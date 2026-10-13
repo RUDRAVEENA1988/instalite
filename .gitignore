@@ -4,6 +4,10 @@ npm-debug.log*
 public/uploads/*
 .firebaserc
 
+firestore-debug.log
+firebase-debug.log
+
 # Playwright
 playwright-report/
 test-results/
+

@@ -29,7 +29,10 @@ service cloud.firestore {
         && request.resource.data.caption.size() > 0
         && request.resource.data.caption.size() <= 500
         && request.resource.data.imageUrl is string
-        && request.resource.data.imageUrl.matches('https://firebasestorage.googleapis.com/.*')
+        && (
+          request.resource.data.imageUrl.matches('https://firebasestorage.googleapis.com/.*')
+          || request.resource.data.imageUrl.matches('http://127\\.0\\.0\\.1:9199/v0/b/.*')
+        )
         && request.resource.data.imagePath is string
         && request.resource.data.imagePath.matches('posts/' + request.auth.uid + '/[^/]+')
         && request.resource.data.timestamp == request.time;
