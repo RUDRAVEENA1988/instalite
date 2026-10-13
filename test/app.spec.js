@@ -3,7 +3,6 @@
  * Browser verification tests for InstaLite.
  *
  * IMPORTANT: These tests run against the Express static server WITHOUT Supabase
- * emulators. The committed Supabase-config.js contains a demo API key, so
  * Supabase-app.js intentionally disables auth-gated buttons at startup and
  * shows a "Supabase is not configured" feed message.
  *
@@ -16,7 +15,6 @@
  *     enabled without Supabase (it just shows the dialog).
  *
  * Tests that require live Supabase (Postgres feed, create-post flow) are
- * intentionally omitted here. They belong in a separate emulator-backed suite.
  *
  * Add feature-specific describe blocks below as workshop issues are implemented.
  */
@@ -247,8 +245,6 @@ test.describe('Static asset routing', () => {
 
 // TEMPLATE — uncomment and fill in when a feature is implemented.
 // Each block must be self-contained and must NOT depend on other blocks.
-// Tests that require sign-in must use the ?emulator=1 URL and a helper that
-// completes the sign-in flow against the local Supabase Auth emulator.
 //
 // test.describe('Dark mode (issue #N)', () => {
 //   test('toggle switches the colour scheme', async ({ page }) => {
@@ -261,8 +257,6 @@ test.describe('Static asset routing', () => {
 //
 // test.describe('Like / unlike posts (issue #N)', () => {
 //   test.beforeEach(async ({ page }) => {
-//     // Navigate with emulator flag so Supabase is active and posts load.
-//     await page.goto('/?emulator=1');
 //     await page.waitForSelector('.post-card');
 //   });
 //   test('like button increments the count', async ({ page }) => { ... });
@@ -272,4 +266,5 @@ test.describe('Static asset routing', () => {
 // test.describe('Save / unsave posts (issue #N)', () => { ... });
 // test.describe('Comments (issue #N)', () => { ... });
 // test.describe('Edit profile (issue #N)', () => { ... });
+
 
