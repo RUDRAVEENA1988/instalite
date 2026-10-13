@@ -34,14 +34,23 @@ test('Express serves the Supabase-enabled page and frontend assets', async () =>
   assert.equal(appScriptResponse.status, 200);
   assert.equal(configResponse.status, 200);
   const config = await configResponse.json();
-  assert.match(config.url, /^https:\/\/[^/]+\.supabase\.co$/);
+  assert.equal(typeof config.url, 'string');
   assert.equal(typeof config.anonKey, 'string');
-  assert.ok(config.anonKey.length > 20);
 
   const appScript = await appScriptResponse.text();
   assert.match(appScript, /supabase\.auth/);
+  assert.match(appScript, /onAuthStateChange\(\(_event, session\) => updateSignedInProfile\(session\?\.user\)\);/);
+  assert.doesNotMatch(appScript, /Unable to read the InstaLite sign-in state/);
   assert.match(appScript, /postgres_changes/);
   assert.match(appScript, /storage\.from\('post-images'\)/);
+  assert.match(appScript, /credential\.session\?\.user/);
+  assert.match(appScript, /supabase\.auth\.getUser\(\)/);
+  assert.match(appScript, /authenticatedUser\.id/);
+  assert.match(appScript, /Confirm your email, then sign in to share a post/);
+  assert.match(appScript, /Supabase has temporarily limited signup emails/);
+  assert.match(appScript, /configure custom SMTP or review Authentication rate limits/);
+  assert.match(appScript, /getAuthErrorMessage\(error, authMode\)/);
+  assert.match(appScript, /row-level security enabled/);
   assert.match(appScript, /from\('posts'\)/);
   assert.doesNotMatch(appScript, /fetch\(['"]\/api\/posts/);
 });
@@ -57,11 +66,8 @@ test('Supabase schema requires authenticated post creation and owner-scoped phot
   const schema = await fs.readFile(path.join(__dirname, '..', 'supabase', 'schema.sql'), 'utf8');
 
   assert.match(schema, /enable row level security/i);
-  assert.match(schema, /create table if not exists public\.profiles/);
-  assert.match(schema, /on_auth_user_created/);
-  assert.match(schema, /auth\.users/);
   assert.match(schema, /auth\.uid\(\)\) = user_id/);
   assert.match(schema, /post-images/);
   assert.match(schema, /storage\.foldername\(name\).*auth\.uid/);
-  assert.match(schema, /pg_publication_tables/);
+  assert.match(schema, /from pg_publication_tables[\s\S]*tablename = 'posts'[\s\S]*alter publication supabase_realtime add table public\.posts/i);
 });

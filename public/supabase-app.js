@@ -1,7 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-const supabaseConfig = await fetch('/api/config')
-  .then((response) => (response.ok ? response.json() : Promise.reject(new Error('Configuration request failed'))))
-  .catch(() => ({ url: '', anonKey: '' }));
+const supabaseConfig = await fetch('/api/config').then((response) => response.json());
 const supabase = createClient(supabaseConfig.url || 'https://invalid.supabase.co', supabaseConfig.anonKey || 'invalid-anon-key');
 
 const feedPosts = document.querySelector('#feed-posts');
@@ -337,6 +335,23 @@ function updateSignedInProfile(user) {
   document.querySelector('#open-auth-mobile').setAttribute('aria-label', signedIn ? 'Sign out' : 'Sign in');
 }
 
+function getAuthErrorMessage(error, mode) {
+  const message = error?.message || '';
+
+  if (/email.*rate limit|rate limit.*email|over_email_send_rate_limit/i.test(message)
+    || (mode === 'sign-up' && error?.status === 429)) {
+    return 'Supabase has temporarily limited signup emails for this project. Stop retrying and wait before requesting another email. If you already created an account, switch to Sign in. If this keeps happening, configure custom SMTP or review Authentication rate limits in your Supabase project.';
+  }
+
+  if (error?.status === 429) {
+    return 'Too many authentication attempts. Wait a little while before trying again.';
+  }
+
+  return error?.code === 'auth/configuration-not-found'
+    ? 'Supabase Authentication is not set up for this project. In Supabase Console, open Authentication, select Get started, then enable Email/Password under Sign-in method.'
+    : message || 'Authentication failed. Please try again.';
+}
+
 const configIsReady = supabaseConfig.url.startsWith('https://')
   && supabaseConfig.anonKey.length > 20
   && !supabaseConfig.url.includes('your-project');
@@ -349,7 +364,7 @@ if (todayDate) {
   });
 }
 
-if (!configIsReady) {
+if (!configIsReady && !useEmulators) {
   showFeedMessage('Supabase is not configured. Copy .env.example to .env and add your project values.', 'error');
   authButton.disabled = true;
   document.querySelector('#open-create-post').disabled = true;
@@ -408,22 +423,24 @@ if (!configIsReady) {
       if (authMode === 'sign-up') {
         const { data: credential, error: signUpError } = await supabase.auth.signUp({ email, password, options: { data: { display_name: displayName } } });
         if (signUpError) throw signUpError;
-        updateSignedInProfile(credential.user);
+        const signedInUser = credential.session?.user || null;
+        updateSignedInProfile(signedInUser);
         authDialog.close();
         authForm.reset();
         setAuthMode('sign-in');
-        showSuccessToast('Your account is ready.');
+        showSuccessToast(signedInUser
+          ? 'Your account is ready.'
+          : 'Confirm your email, then sign in to share a post.');
       } else {
-        await supabase.auth.signInWithPassword({ email, password });
+        const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+        if (signInError) throw signInError;
         authDialog.close();
         authForm.reset();
         showSuccessToast('Welcome back.');
       }
     } catch (error) {
       console.error('Unable to authenticate with InstaLite:', error);
-      authFeedback.textContent = error.code === 'auth/configuration-not-found'
-        ? 'Supabase Authentication is not set up for this project. In Supabase Console, open Authentication, select Get started, then enable Email/Password under Sign-in method.'
-        : error.message;
+      authFeedback.textContent = getAuthErrorMessage(error, authMode);
     } finally {
       authSubmit.disabled = false;
     }
@@ -462,11 +479,19 @@ if (!configIsReady) {
     submitButton.disabled = true;
     submitButton.textContent = 'Uploading…';
     const extension = supportedImageTypes.get(image.type);
-    const imagePath = `posts/${currentUser.id}/${crypto.randomUUID()}.${extension}`;
+    let imagePath;
     let imageUploaded = false;
-    let uploadStage = 'Authentication';
+    let uploadStage = 'Authentication token refresh';
 
     try {
+      const { data: { user: authenticatedUser }, error: authenticationError } = await supabase.auth.getUser();
+      if (authenticationError) throw authenticationError;
+      if (!authenticatedUser || authenticatedUser.id !== currentUser.id) {
+        updateSignedInProfile(authenticatedUser);
+        throw new Error('Your sign-in session is not active. Confirm your email or sign in again before sharing.');
+      }
+
+      imagePath = `posts/${authenticatedUser.id}/${crypto.randomUUID()}.${extension}`;
       uploadStage = 'Storage photo upload';
       const { error: uploadError } = await supabase.storage.from('post-images').upload(imagePath, image, { contentType: image.type, upsert: false });
       if (uploadError) throw uploadError;
@@ -476,11 +501,8 @@ if (!configIsReady) {
       const username = (currentUser.user_metadata?.display_name || currentUser.email?.split('@')[0] || 'instalite-user').slice(0, 30);
 
       uploadStage = 'Supabase post creation';
-      const { data: authData, error: authError } = await supabase.auth.getUser();
-      if (authError || !authData.user) throw authError || new Error('Your Supabase session expired. Sign in again.');
-
       const { error: postError } = await supabase.from('posts').insert({
-        user_id: authData.user.id,
+        user_id: authenticatedUser.id,
         username,
         caption,
         image_url: imageUrl,
@@ -502,14 +524,19 @@ if (!configIsReady) {
       }
 
       console.error('Unable to upload an InstaLite post:', error);
+      const errorMessage = error.message || '';
+      const storagePolicyDenied = uploadStage === 'Storage photo upload'
+        && /row-level security policy/i.test(errorMessage);
       const serviceName = uploadStage === 'Authentication token refresh'
         ? 'Supabase Authentication'
         : uploadStage.startsWith('Storage')
           ? 'Supabase Storage'
           : 'Supabase database';
-      createPostFeedback.textContent = error.code === 'permission-denied'
+      createPostFeedback.textContent = storagePolicyDenied
+        ? 'Supabase Storage rejected this upload. Verify that this project’s INSERT policy allows authenticated users to upload to post-images under posts/<your-user-id>/.... Keep row-level security enabled.'
+        : error.code === 'permission-denied'
         ? `${uploadStage} was denied. Sign in again and check that ${serviceName} is configured and its rules allow authenticated users.`
-        : error.message || 'Your photo could not be uploaded. Please try again.';
+        : errorMessage || 'Your photo could not be uploaded. Please try again.';
     } finally {
       submitButton.disabled = false;
       submitButton.textContent = 'Share post';
@@ -554,5 +581,3 @@ if (!configIsReady) {
   setAuthMode('sign-in');
   listenForPosts();
 }
-
-
