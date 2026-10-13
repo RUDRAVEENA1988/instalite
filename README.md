@@ -370,6 +370,26 @@ For a contribution:
 
 See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for the existing step-by-step contributor guide.
 
-## License
+.##  Contribution Submissions
 
-No `LICENSE` file is currently present, so the project's license has not yet been specified.
+Contributors who want to submit their work must follow the submission guidelines below.
+
+###  ##  Submission Guidelines
+
+Before submitting, carefully review the `Submissions/SUBMISSION_TEMPLATE.md` file and follow the instructions provided in it.
+
+Create your own submission file named `teamname-submission.md` inside the `Submissions/` folder, following the template.
+
+**Important:** Only the Markdown submission file should be placed in the `Submissions/` folder. Submit your actual code changes through a separate branch and a normal Pull Request (PR), as usual. Do not place source code or other project files in the `Submissions/` folder.
+
+**Example:**
+```text
+Submissions/
+├── SUBMISSION_TEMPLATE.md
+└── rubix-submission.md
+```
+
+.
+
+###  
+- * 
