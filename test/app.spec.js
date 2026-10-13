@@ -2,20 +2,20 @@
 /**
  * Browser verification tests for InstaLite.
  *
- * IMPORTANT: These tests run against the Express static server WITHOUT Firebase
- * emulators. The committed firebase-config.js contains a demo API key, so
- * firebase-app.js intentionally disables auth-gated buttons at startup and
- * shows a "Firebase is not configured" feed message.
+ * IMPORTANT: These tests run against the Express static server WITHOUT Supabase
+ * emulators. The committed Supabase-config.js contains a demo API key, so
+ * Supabase-app.js intentionally disables auth-gated buttons at startup and
+ * shows a "Supabase is not configured" feed message.
  *
  * Tests here verify:
  *   - The page and all required assets are served correctly.
  *   - The static HTML shell, navigation, and dialogs are present in the DOM.
- *   - Elements that are expected to be disabled without Firebase ARE disabled
+ *   - Elements that are expected to be disabled without Supabase ARE disabled
  *     (guards against a participant accidentally removing the auth gate).
  *   - The auth dialog can be opened via the Sign-in button, which remains
- *     enabled without Firebase (it just shows the dialog).
+ *     enabled without Supabase (it just shows the dialog).
  *
- * Tests that require live Firebase (Firestore feed, create-post flow) are
+ * Tests that require live Supabase (Postgres feed, create-post flow) are
  * intentionally omitted here. They belong in a separate emulator-backed suite.
  *
  * Add feature-specific describe blocks below as workshop issues are implemented.
@@ -28,18 +28,18 @@ const { expect, test } = require('@playwright/test');
 // ---------------------------------------------------------------------------
 
 /**
- * Navigate to the home page and wait until firebase-app.js has run its
+ * Navigate to the home page and wait until Supabase-app.js has run its
  * startup logic (the feed message changes from the inline placeholder).
  *
  * @param {import('@playwright/test').Page} page
  */
 async function gotoHome(page) {
   await page.goto('/');
-  // firebase-app.js is a module script; wait for it to update the feed area.
+  // Supabase-app.js is a module script; wait for it to update the feed area.
   await page.waitForFunction(() => {
     const el = document.querySelector('#feed-posts');
     // The inline HTML placeholder text is "Finding your little moments…".
-    // firebase-app.js replaces it with an error message when not configured.
+    // Supabase-app.js replaces it with an error message when not configured.
     return el && el.textContent.trim().length > 0;
   }, { timeout: 10_000 });
 }
@@ -65,13 +65,13 @@ test.describe('Page load', () => {
     expect(response.headers()['content-type']).toMatch(/text\/css/);
   });
 
-  test('serves firebase-app.js without error', async ({ page }) => {
-    const response = await page.goto('/firebase-app.js');
+  test('serves Supabase-app.js without error', async ({ page }) => {
+    const response = await page.goto('/Supabase-app.js');
     expect(response.status()).toBe(200);
   });
 
-  test('serves firebase-config.js without error', async ({ page }) => {
-    const response = await page.goto('/firebase-config.js');
+  test('serves Supabase-config.js without error', async ({ page }) => {
+    const response = await page.goto('/Supabase-config.js');
     expect(response.status()).toBe(200);
   });
 });
@@ -95,12 +95,12 @@ test.describe('Sidebar navigation', () => {
   });
 
   test('"Create post" button is present in the DOM', async ({ page }) => {
-    // The button exists in HTML; firebase-app.js disables it when Firebase is
+    // The button exists in HTML; Supabase-app.js disables it when Supabase is
     // not configured. Its presence (not enabled state) is what we verify here.
     await expect(page.locator('#open-create-post')).toBeAttached();
   });
 
-  test('"Create post" button is disabled when Firebase is not configured', async ({ page }) => {
+  test('"Create post" button is disabled when Supabase is not configured', async ({ page }) => {
     // This guards against a participant accidentally removing the auth gate.
     await gotoHome(page);
     await expect(page.locator('#open-create-post')).toBeDisabled();
@@ -134,11 +134,11 @@ test.describe('Feed section', () => {
     await expect(page.locator('#feed-posts')).toBeAttached();
   });
 
-  test('feed shows a configuration error when Firebase is not set up', async ({ page }) => {
-    // Expected behaviour: firebase-app.js detects the demo API key and shows
-    // an error message instead of trying to connect to production Firebase.
+  test('feed shows a configuration error when Supabase is not set up', async ({ page }) => {
+    // Expected behaviour: Supabase-app.js detects the demo API key and shows
+    // an error message instead of trying to connect to production Supabase.
     const feedPosts = page.locator('#feed-posts');
-    await expect(feedPosts).toContainText(/Firebase is not configured/i);
+    await expect(feedPosts).toContainText(/Supabase is not configured/i);
   });
 
   test('stories section is visible', async ({ page }) => {
@@ -147,7 +147,7 @@ test.describe('Feed section', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Create-post dialog — static structure (no interaction without Firebase)
+// Create-post dialog — static structure (no interaction without Supabase)
 // ---------------------------------------------------------------------------
 
 test.describe('Create-post dialog (static structure)', () => {
@@ -206,7 +206,7 @@ test.describe('Sign-in dialog', () => {
 
   test('takes a screenshot of the initial page state', async ({ page }) => {
     await gotoHome(page);
-    await page.screenshot({ path: 'test-results/home-no-firebase.png', fullPage: false });
+    await page.screenshot({ path: 'test-results/home-no-Supabase.png', fullPage: false });
   });
 });
 
@@ -248,7 +248,7 @@ test.describe('Static asset routing', () => {
 // TEMPLATE — uncomment and fill in when a feature is implemented.
 // Each block must be self-contained and must NOT depend on other blocks.
 // Tests that require sign-in must use the ?emulator=1 URL and a helper that
-// completes the sign-in flow against the local Firebase Auth emulator.
+// completes the sign-in flow against the local Supabase Auth emulator.
 //
 // test.describe('Dark mode (issue #N)', () => {
 //   test('toggle switches the colour scheme', async ({ page }) => {
@@ -261,7 +261,7 @@ test.describe('Static asset routing', () => {
 //
 // test.describe('Like / unlike posts (issue #N)', () => {
 //   test.beforeEach(async ({ page }) => {
-//     // Navigate with emulator flag so Firebase is active and posts load.
+//     // Navigate with emulator flag so Supabase is active and posts load.
 //     await page.goto('/?emulator=1');
 //     await page.waitForSelector('.post-card');
 //   });
@@ -272,3 +272,4 @@ test.describe('Static asset routing', () => {
 // test.describe('Save / unsave posts (issue #N)', () => { ... });
 // test.describe('Comments (issue #N)', () => { ... });
 // test.describe('Edit profile (issue #N)', () => { ... });
+
