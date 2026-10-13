@@ -867,6 +867,133 @@ a.navigation__link:hover {
   font-size: 11px;
 }
 
+.upload-dropzone {
+  position: relative;
+  min-height: 148px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  overflow: hidden;
+  border: 1px dashed #e8c4ce;
+  border-radius: 12px;
+  background: #fffaf9;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 160ms ease, background-color 160ms ease;
+}
+
+.upload-dropzone:hover,
+.upload-dropzone--dragging {
+  border-color: var(--pink);
+  background: #fff4f4;
+}
+
+.upload-dropzone[hidden],
+.upload-preview[hidden] {
+  display: none;
+}
+
+.upload-dropzone__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.upload-dropzone:focus-within,
+.upload-dropzone:focus-visible {
+  outline: 3px solid #fbeef1;
+  outline-offset: 2px;
+}
+
+.upload-dropzone__icon {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--peach);
+  color: var(--pink-dark);
+  font-size: 22px;
+}
+
+.upload-dropzone__title {
+  margin-top: 3px;
+  color: #454852;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.upload-dropzone__hint,
+.upload-dropzone__formats {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.upload-dropzone__browse {
+  color: var(--pink-dark);
+  font-weight: 650;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.upload-preview {
+  min-height: 82px;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  border: 1px solid #eee8e6;
+  border-radius: 11px;
+  background: #fffdfc;
+}
+
+.upload-preview__image {
+  width: 64px;
+  height: 64px;
+  flex: 0 0 auto;
+  border-radius: 8px;
+  background: #f5f0ee;
+  object-fit: cover;
+}
+
+.upload-preview__details {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+}
+
+.upload-preview__name {
+  overflow: hidden;
+  color: #454852;
+  font-size: 12px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.upload-preview__size {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.upload-preview__remove {
+  margin-left: auto;
+  padding: 7px 9px;
+  border: 0;
+  border-radius: 7px;
+  background: #fff0f1;
+  color: var(--pink-dark);
+  font-size: 11px;
+  font-weight: 650;
+}
+
 .create-form__feedback {
   min-height: 18px;
   margin: 4px 0 0;

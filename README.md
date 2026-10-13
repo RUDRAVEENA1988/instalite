@@ -13,9 +13,11 @@ This hands-on GitHub workshop project provides a small, understandable starting 
 - The browser fetches post data from `GET /api/posts` and builds the feed dynamically.
 - Loading, empty, and error states are shown in the feed.
 - Three sample posts demonstrate the feed; posts are kept in an in-memory JavaScript array.
-- A create-post dialog sends a username, photo URL, and caption to `POST /api/posts`.
+- A create-post dialog uploads a JPEG, PNG, or WebP image alongside a username and caption.
+- Uploaded images are limited to 5 MB and previewed before submission; drag and drop is supported.
 - The server validates new posts, assigns an ID and timestamp, and returns them with HTTP 201.
 - Successful posts appear at the top of the feed without a page reload.
+- Multer stores uploads in `public/uploads/` under generated filenames after image-signature validation.
 - Likes, comments, profile links, and stories are illustrative interface elements, not interactive features.
 
 ## Technology stack
@@ -32,7 +34,8 @@ instalite/
 ├── public/
 │   ├── index.html   # Page structure
 │   ├── style.css    # Responsive styles
-│   └── script.js    # Fetches the feed and submits new posts
+│   ├── script.js    # Fetches the feed and submits new posts
+│   └── uploads/     # Created automatically for uploaded photos
 ├── server.js        # Express server and REST API
 ├── package.json     # Project metadata and dependencies
 ├── package-lock.json
@@ -82,25 +85,29 @@ Each post object includes `id`, `username`, `avatarUrl`, `imageUrl`, `caption`, 
 
 ### `POST /api/posts`
 
-Creates a post in memory. `username`, `imageUrl`, and `caption` must be non-empty strings. The username is limited to 30 characters, the caption to 500 characters, and the image URL to 2048 characters; image URLs must use `http://` or `https://`.
+Creates a post using a photo upload. `username`, `caption`, and one image file are required. The username is limited to 30 characters and the caption to 500 characters.
 
 Example:
 
 ```bash
 curl -X POST http://localhost:3000/api/posts \
-  -H "Content-Type: application/json" \
-  -d "{\"username\":\"ava.morgan\",\"imageUrl\":\"https://example.com/photo.jpg\",\"caption\":\"A little moment worth keeping.\"}"
+  -F "username=ava.morgan" \
+  -F "caption=A little moment worth keeping." \
+  -F "image=@./photo.jpg"
 ```
 
-A successful request returns HTTP `201 Created` and the created post, including its generated `id`, ISO 8601 `timestamp`, sample `avatarUrl`, and initial `likes` count of `0`. Invalid input or malformed JSON returns HTTP `400` with a JSON `error` message.
+Send `multipart/form-data` with the fields `username`, `caption`, and `image` (one file). Accepted image types are JPEG, PNG, and WebP; each image must be 5 MB or smaller. The server checks the uploaded MIME type and file signature, generates the stored filename, and serves the resulting image at `/uploads/<generated-name>`.
+
+A successful request returns HTTP `201 Created` and the created post, including its generated `id`, `imageUrl`, ISO 8601 `timestamp`, sample `avatarUrl`, and initial `likes` count of `0`. Invalid fields and unsupported images return a JSON `error` message; oversized uploads return HTTP `413`.
 
 ## Current limitations
 
-- Post data is stored only in memory. User-created posts are lost when the server restarts; the three sample posts are reloaded at startup.
-- Photos must be provided as publicly accessible URLs; the app does not upload or verify image files.
+- Post metadata is stored only in memory. User-created posts are lost when the server restarts; the three sample posts are reloaded at startup.
+- Uploaded image files are stored locally in `public/uploads/`. They may remain on a local machine after a restart, but local filesystem uploads and in-memory metadata are not production-persistent and can be lost on deployment, instance replacement, or restart.
+- The server accepts JPEG, PNG, and WebP images up to 5 MB each. It does not resize or otherwise transform uploaded photos.
 - Likes, comments, story links, profile links, and suggestions are illustrative interface elements, not interactive features.
-- There is no authentication, database, or image-upload support.
-- Future improvements may include working likes and comments, user authentication, persistent storage, photo uploads, profiles and following, pagination, and search.
+- There is no authentication, database, or cloud image storage.
+- Future improvements may include working likes and comments, user authentication, durable image and metadata storage, profiles and following, pagination, and search.
 
 ## GitHub workshop
 

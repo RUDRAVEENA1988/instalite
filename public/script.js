@@ -4,6 +4,15 @@ const createDialog = document.querySelector('#create-dialog');
 const createPostForm = document.querySelector('#create-post-form');
 const createPostFeedback = document.querySelector('#create-post-feedback');
 const postSuccessToast = document.querySelector('#post-success-toast');
+const imageInput = document.querySelector('#post-image');
+const uploadDropzone = document.querySelector('#upload-dropzone');
+const uploadPreview = document.querySelector('#upload-preview');
+const uploadPreviewImage = document.querySelector('#upload-preview-image');
+const uploadPreviewName = document.querySelector('#upload-preview-name');
+const uploadPreviewSize = document.querySelector('#upload-preview-size');
+const maximumImageSize = 5 * 1024 * 1024;
+const supportedImageTypes = new Set(['image/jpeg', 'image/png', 'image/webp']);
+let previewUrl;
 let toastTimeout;
 
 function formatTimeAgo(timestamp) {
@@ -219,6 +228,52 @@ function openCreatePostDialog() {
   createPostForm.elements.username.focus();
 }
 
+function clearImagePreview() {
+  if (previewUrl) {
+    URL.revokeObjectURL(previewUrl);
+    previewUrl = undefined;
+  }
+
+  imageInput.value = '';
+  uploadPreview.hidden = true;
+  uploadPreviewImage.removeAttribute('src');
+  uploadPreviewName.textContent = '';
+  uploadPreviewSize.textContent = '';
+  uploadDropzone.hidden = false;
+}
+
+function previewSelectedImage(file) {
+  createPostFeedback.textContent = '';
+
+  if (!file) {
+    clearImagePreview();
+    return;
+  }
+
+  if (!supportedImageTypes.has(file.type)) {
+    clearImagePreview();
+    createPostFeedback.textContent = 'Choose a JPEG, PNG, or WebP image.';
+    return;
+  }
+
+  if (file.size > maximumImageSize) {
+    clearImagePreview();
+    createPostFeedback.textContent = 'Choose an image that is 5 MB or smaller.';
+    return;
+  }
+
+  if (previewUrl) {
+    URL.revokeObjectURL(previewUrl);
+  }
+
+  previewUrl = URL.createObjectURL(file);
+  uploadPreviewImage.src = previewUrl;
+  uploadPreviewName.textContent = file.name;
+  uploadPreviewSize.textContent = `${(file.size / (1024 * 1024)).toFixed(2)} MB`;
+  uploadPreview.hidden = false;
+  uploadDropzone.hidden = true;
+}
+
 function showSuccessToast(message) {
   window.clearTimeout(toastTimeout);
   postSuccessToast.textContent = message;
@@ -234,51 +289,93 @@ document.querySelector('#close-create-post').addEventListener('click', () => {
   createDialog.close();
 });
 
+imageInput.addEventListener('change', () => {
+  previewSelectedImage(imageInput.files[0]);
+});
+
+document.querySelector('#remove-upload').addEventListener('click', clearImagePreview);
+
+uploadDropzone.addEventListener('keydown', (event) => {
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault();
+    imageInput.click();
+  }
+});
+
+uploadDropzone.addEventListener('dragover', (event) => {
+  event.preventDefault();
+  uploadDropzone.classList.add('upload-dropzone--dragging');
+});
+
+uploadDropzone.addEventListener('dragleave', () => {
+  uploadDropzone.classList.remove('upload-dropzone--dragging');
+});
+
+uploadDropzone.addEventListener('drop', (event) => {
+  event.preventDefault();
+  uploadDropzone.classList.remove('upload-dropzone--dragging');
+
+  const [file] = event.dataTransfer.files;
+
+  if (!file) {
+    return;
+  }
+
+  const transfer = new DataTransfer();
+  transfer.items.add(file);
+  imageInput.files = transfer.files;
+  previewSelectedImage(file);
+});
+
 createPostForm.addEventListener('submit', async (event) => {
   event.preventDefault();
   createPostFeedback.textContent = '';
 
   const formData = new FormData(createPostForm);
-  const postDetails = {
-    username: formData.get('username').trim(),
-    imageUrl: formData.get('imageUrl').trim(),
-    caption: formData.get('caption').trim(),
-  };
+  const username = formData.get('username').trim();
+  const caption = formData.get('caption').trim();
+  const image = formData.get('image');
 
-  if (Object.values(postDetails).some((value) => !value)) {
-    createPostFeedback.textContent = 'Please fill in your username, photo URL, and caption.';
+  if (!username || !caption || !(image instanceof File) || image.size === 0) {
+    createPostFeedback.textContent = 'Please fill in your username and caption, and choose a photo.';
     return;
   }
 
-  if (!createPostForm.elements.imageUrl.checkValidity()) {
-    createPostFeedback.textContent = 'Enter a valid photo URL starting with http:// or https://.';
-    createPostForm.elements.imageUrl.focus();
+  if (!supportedImageTypes.has(image.type)) {
+    createPostFeedback.textContent = 'Choose a JPEG, PNG, or WebP image.';
+    imageInput.focus();
+    return;
+  }
+
+  if (image.size > maximumImageSize) {
+    createPostFeedback.textContent = 'Choose an image that is 5 MB or smaller.';
+    imageInput.focus();
     return;
   }
 
   const submitButton = document.querySelector('#submit-create-post');
   submitButton.disabled = true;
-  submitButton.textContent = 'Sharing…';
+  submitButton.textContent = 'Uploading…';
 
   try {
     const response = await fetch('/api/posts', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(postDetails),
+      body: formData,
     });
-    const createdPost = await response.json();
+    const result = await response.json();
 
     if (!response.ok) {
-      throw new Error(createdPost.error || `Unable to create post (HTTP ${response.status}).`);
+      throw new Error(result.error || `Unable to upload photo (HTTP ${response.status}).`);
     }
 
     createPostForm.reset();
+    clearImagePreview();
     createDialog.close();
     showSuccessToast('Your moment was shared.');
     await loadPosts();
   } catch (error) {
-    console.error('Unable to create an InstaLite post:', error);
-    createPostFeedback.textContent = error.message || 'Your post could not be shared. Please try again.';
+    console.error('Unable to upload an InstaLite post:', error);
+    createPostFeedback.textContent = error.message || 'Your photo could not be uploaded. Please try again.';
   } finally {
     submitButton.disabled = false;
     submitButton.textContent = 'Share post';

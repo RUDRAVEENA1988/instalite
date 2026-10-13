@@ -194,9 +194,22 @@
         <label class="create-form__label" for="post-username">Username</label>
         <input class="create-form__input" id="post-username" name="username" type="text" maxlength="30" autocomplete="username" placeholder="e.g. ava.morgan" required>
 
-        <label class="create-form__label" for="post-image-url">Photo URL</label>
-        <input class="create-form__input" id="post-image-url" name="imageUrl" type="url" maxlength="2048" inputmode="url" placeholder="https://example.com/my-photo.jpg" aria-describedby="image-url-help" required>
-        <span class="create-form__hint" id="image-url-help">Use an image URL beginning with https:// or http://.</span>
+        <span class="create-form__label">Photo</span>
+        <label class="upload-dropzone" id="upload-dropzone" for="post-image" tabindex="0">
+          <input class="upload-dropzone__input" id="post-image" name="image" type="file" accept="image/jpeg,image/png,image/webp" aria-describedby="upload-image-help" required>
+          <span class="upload-dropzone__icon" aria-hidden="true">↑</span>
+          <span class="upload-dropzone__title">Drop your photo here</span>
+          <span class="upload-dropzone__hint">or <span class="upload-dropzone__browse">browse files</span></span>
+          <span class="upload-dropzone__formats" id="upload-image-help">JPEG, PNG, or WebP · up to 5 MB</span>
+        </label>
+        <div class="upload-preview" id="upload-preview" hidden>
+          <img class="upload-preview__image" id="upload-preview-image" alt="Preview of the selected photo">
+          <div class="upload-preview__details">
+            <span class="upload-preview__name" id="upload-preview-name"></span>
+            <span class="upload-preview__size" id="upload-preview-size"></span>
+          </div>
+          <button class="upload-preview__remove" id="remove-upload" type="button">Remove</button>
+        </div>
 
         <label class="create-form__label" for="post-caption">Caption</label>
         <textarea class="create-form__input create-form__caption" id="post-caption" name="caption" maxlength="500" rows="3" placeholder="What's the moment?" required></textarea>
