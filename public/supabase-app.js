@@ -1,5 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-const supabaseConfig = await fetch('/api/config').then((response) => response.json());
+const supabaseConfig = await fetch('/api/config')
+  .then((response) => (response.ok ? response.json() : Promise.reject(new Error('Configuration request failed'))))
+  .catch(() => ({ url: '', anonKey: '' }));
 const supabase = createClient(supabaseConfig.url || 'https://invalid.supabase.co', supabaseConfig.anonKey || 'invalid-anon-key');
 
 const feedPosts = document.querySelector('#feed-posts');
@@ -347,7 +349,7 @@ if (todayDate) {
   });
 }
 
-if (!configIsReady && !useEmulators) {
+if (!configIsReady) {
   showFeedMessage('Supabase is not configured. Copy .env.example to .env and add your project values.', 'error');
   authButton.disabled = true;
   document.querySelector('#open-create-post').disabled = true;
@@ -386,9 +388,6 @@ if (!configIsReady && !useEmulators) {
   });
 
   supabase.auth.onAuthStateChange((_event, session) => updateSignedInProfile(session?.user));
-    console.error('Unable to read the InstaLite sign-in state:', error);
-    authFeedback.textContent = 'Your sign-in state could not be loaded. Refresh and try again.';
-  });
 
   authForm.addEventListener('submit', async (event) => {
     event.preventDefault();

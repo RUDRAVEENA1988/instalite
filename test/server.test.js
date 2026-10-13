@@ -33,7 +33,10 @@ test('Express serves the Supabase-enabled page and frontend assets', async () =>
   assert.equal(stylesheetResponse.status, 200);
   assert.equal(appScriptResponse.status, 200);
   assert.equal(configResponse.status, 200);
-  assert.deepEqual(await configResponse.json(), { url: '', anonKey: '' });
+  const config = await configResponse.json();
+  assert.match(config.url, /^https:\/\/[^/]+\.supabase\.co$/);
+  assert.equal(typeof config.anonKey, 'string');
+  assert.ok(config.anonKey.length > 20);
 
   const appScript = await appScriptResponse.text();
   assert.match(appScript, /supabase\.auth/);
@@ -60,4 +63,5 @@ test('Supabase schema requires authenticated post creation and owner-scoped phot
   assert.match(schema, /auth\.uid\(\)\) = user_id/);
   assert.match(schema, /post-images/);
   assert.match(schema, /storage\.foldername\(name\).*auth\.uid/);
+  assert.match(schema, /pg_publication_tables/);
 });
