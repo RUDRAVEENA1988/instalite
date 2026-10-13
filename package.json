@@ -1,0 +1,13 @@
+{
+  "name": "instalite",
+  "version": "1.0.0",
+  "description": "A beginner-friendly photo-sharing app for learning frontend and REST API integration.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}

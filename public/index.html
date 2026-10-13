@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#fafafa">
+    <meta name="description" content="InstaLite — a little space for the moments worth sharing.">
+    <title>InstaLite — A little life, shared.</title>
+    <link rel="preconnect" href="https://images.unsplash.com">
+    <link rel="stylesheet" href="/style.css">
+    <script src="/script.js" defer></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Main navigation">
+        <a class="brand" href="#home" aria-label="InstaLite home">
+          <span class="brand__icon" aria-hidden="true">
+            <svg viewBox="0 0 32 32" fill="none">
+              <rect x="4" y="4" width="24" height="24" rx="8" stroke="currentColor" stroke-width="2.3"/>
+              <circle cx="16" cy="16" r="5" stroke="currentColor" stroke-width="2.3"/>
+              <circle cx="23.5" cy="8.8" r="1.5" fill="currentColor"/>
+            </svg>
+          </span>
+          <span>InstaLite</span>
+        </a>
+
+        <nav class="navigation" aria-label="Pages">
+          <a class="navigation__link navigation__link--active" href="#home" aria-current="page">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-6v-7h-4v7H4a1 1 0 0 1-1-1V10Z"/></svg>
+            <span>Home</span>
+          </a>
+          <button class="navigation__link" type="button" disabled title="Search is coming soon">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg>
+            <span>Search</span>
+          </button>
+          <button class="navigation__link" type="button" disabled title="Explore is coming soon">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15.8 8.2-2.3 5.3-5.3 2.3 2.3-5.3 5.3-2.3Z"/></svg>
+            <span>Explore</span>
+          </button>
+          <button class="navigation__link" type="button" disabled title="Notifications are coming soon">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 22h4"/></svg>
+            <span>Notifications</span>
+          </button>
+          <button class="navigation__link navigation__link--create" id="open-create-post" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="M12 8v8m-4-4h8"/></svg>
+            <span>Create post</span>
+            <span class="navigation__soon">New</span>
+          </button>
+          <button class="navigation__link navigation__profile" type="button" disabled title="Profile pages are coming soon">
+            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=96&h=96&q=80" alt="" width="26" height="26">
+            <span>Profile</span>
+          </button>
+        </nav>
+
+        <div class="sidebar__footer">
+          <span class="sidebar__sparkle" aria-hidden="true">✳</span>
+          <span>Made for the little moments.</span>
+        </div>
+      </aside>
+
+      <main class="main-content" id="home">
+        <header class="mobile-header">
+          <a class="brand brand--mobile" href="#home">
+            <span class="brand__icon" aria-hidden="true">
+              <svg viewBox="0 0 32 32" fill="none">
+                <rect x="4" y="4" width="24" height="24" rx="8" stroke="currentColor" stroke-width="2.3"/>
+                <circle cx="16" cy="16" r="5" stroke="currentColor" stroke-width="2.3"/>
+                <circle cx="23.5" cy="8.8" r="1.5" fill="currentColor"/>
+              </svg>
+            </span>
+            <span>InstaLite</span>
+          </a>
+          <button class="mobile-search" type="button" disabled aria-label="Search (coming soon)">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg>
+          </button>
+        </header>
+
+        <section class="stories" aria-label="Stories">
+          <div class="story">
+            <span class="story__ring"><img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&h=120&q=80" alt=""></span>
+            <span class="story__name">Your story</span>
+          </div>
+          <div class="story">
+            <span class="story__ring"><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&h=120&q=80" alt=""></span>
+            <span class="story__name">leo.park</span>
+          </div>
+          <div class="story">
+            <span class="story__ring"><img src="https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&w=120&h=120&q=80" alt=""></span>
+            <span class="story__name">nina.rivers</span>
+          </div>
+          <div class="story">
+            <span class="story__ring"><img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&h=120&q=80&sat=-30" alt=""></span>
+            <span class="story__name">ellie.w</span>
+          </div>
+          <div class="story">
+            <span class="story__ring"><img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=120&h=120&q=80" alt=""></span>
+            <span class="story__name">milo.gray</span>
+          </div>
+          <div class="story">
+            <span class="story__ring"><img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=120&h=120&q=80" alt=""></span>
+            <span class="story__name">zoe.sun</span>
+          </div>
+        </section>
+
+        <section class="feed" aria-label="Photo feed" aria-live="polite">
+          <div class="feed__heading">
+            <div>
+              <p class="eyebrow">YOUR DAILY DOSE OF GOOD</p>
+              <h1>Little moments</h1>
+            </div>
+            <span class="feed__date" id="today-date"></span>
+          </div>
+          <div class="feed__posts" id="feed-posts">
+            <div class="feed-message feed-message--loading" role="status">
+              <span class="feed-message__spinner" aria-hidden="true"></span>
+              <span>Finding your little moments…</span>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <aside class="right-sidebar" aria-label="Your profile and suggestions">
+        <section class="current-profile" aria-label="Your profile">
+          <img class="avatar avatar--large" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&h=120&q=80" alt="" width="48" height="48">
+          <div class="current-profile__identity">
+            <strong>your.name</strong>
+            <span>Your little corner of the internet</span>
+          </div>
+          <span class="online-dot" aria-label="Online"></span>
+        </section>
+
+        <section class="suggestions" aria-labelledby="suggestions-heading">
+          <div class="suggestions__heading">
+            <h2 id="suggestions-heading">A few good follows</h2>
+            <span>JUST FOR YOU</span>
+          </div>
+          <ul class="suggestion-list">
+            <li class="suggestion">
+              <img class="avatar" src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=96&h=96&q=80" alt="" width="38" height="38">
+              <div class="suggestion__identity"><strong>leo.park</strong><span>Into slow mornings</span></div>
+              <span class="suggestion__action">Follow</span>
+            </li>
+            <li class="suggestion">
+              <img class="avatar" src="https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&w=96&h=96&q=80" alt="" width="38" height="38">
+              <div class="suggestion__identity"><strong>nina.rivers</strong><span>Nature, mostly</span></div>
+              <span class="suggestion__action">Follow</span>
+            </li>
+            <li class="suggestion">
+              <img class="avatar" src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=96&h=96&q=80" alt="" width="38" height="38">
+              <div class="suggestion__identity"><strong>milo.gray</strong><span>Collecting places</span></div>
+              <span class="suggestion__action">Follow</span>
+            </li>
+            <li class="suggestion">
+              <img class="avatar" src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=96&h=96&q=80" alt="" width="38" height="38">
+              <div class="suggestion__identity"><strong>zoe.sun</strong><span>One day at a time</span></div>
+              <span class="suggestion__action">Follow</span>
+            </li>
+          </ul>
+        </section>
+
+        <p class="sidebar-note">This little space is yours to enjoy. Take what you need, share what you love.</p>
+        <p class="legal-note">ABOUT · HELP · PRIVACY · TERMS<br>© 2025 INSTALITE</p>
+      </aside>
+
+      <nav class="mobile-navigation" aria-label="Mobile navigation">
+        <a class="mobile-navigation__link mobile-navigation__link--active" href="#home" aria-current="page" aria-label="Home">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-6v-7h-4v7H4a1 1 0 0 1-1-1V10Z"/></svg>
+        </a>
+        <button class="mobile-navigation__link" type="button" disabled aria-label="Explore (coming soon)">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15.8 8.2-2.3 5.3-5.3 2.3 2.3-5.3 5.3-2.3Z"/></svg>
+        </button>
+        <button class="mobile-navigation__link" id="open-create-post-mobile" type="button" aria-label="Create post">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="M12 8v8m-4-4h8"/></svg>
+        </button>
+        <button class="mobile-navigation__link" type="button" disabled aria-label="Notifications (coming soon)">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 22h4"/></svg>
+        </button>
+        <button class="mobile-navigation__link" type="button" disabled aria-label="Profile (coming soon)">
+          <img class="avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=96&h=96&q=80" alt="" width="27" height="27">
+        </button>
+      </nav>
+    </div>
+
+    <dialog class="create-dialog" id="create-dialog" aria-labelledby="create-dialog-title">
+      <form class="create-form" id="create-post-form">
+        <header class="create-form__header">
+          <div>
+            <p class="eyebrow">SHARE A LITTLE JOY</p>
+            <h2 id="create-dialog-title">Create a post</h2>
+          </div>
+          <button class="create-form__close" id="close-create-post" type="button" aria-label="Close create post dialog">×</button>
+        </header>
+
+        <label class="create-form__label" for="post-username">Username</label>
+        <input class="create-form__input" id="post-username" name="username" type="text" maxlength="30" autocomplete="username" placeholder="e.g. ava.morgan" required>
+
+        <label class="create-form__label" for="post-image-url">Photo URL</label>
+        <input class="create-form__input" id="post-image-url" name="imageUrl" type="url" maxlength="2048" inputmode="url" placeholder="https://example.com/my-photo.jpg" aria-describedby="image-url-help" required>
+        <span class="create-form__hint" id="image-url-help">Use an image URL beginning with https:// or http://.</span>
+
+        <label class="create-form__label" for="post-caption">Caption</label>
+        <textarea class="create-form__input create-form__caption" id="post-caption" name="caption" maxlength="500" rows="3" placeholder="What's the moment?" required></textarea>
+
+        <p class="create-form__feedback" id="create-post-feedback" role="status" aria-live="polite"></p>
+        <button class="create-form__submit" id="submit-create-post" type="submit">Share post</button>
+      </form>
+    </dialog>
+    <p class="toast" id="post-success-toast" role="status" aria-live="polite" hidden></p>
+  </body>
+</html>
