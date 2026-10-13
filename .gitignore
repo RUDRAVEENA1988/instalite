@@ -3,3 +3,7 @@ npm-debug.log*
 .env
 public/uploads/*
 .firebaserc
+
+# Playwright
+playwright-report/
+test-results/
