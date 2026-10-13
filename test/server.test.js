@@ -19,26 +19,27 @@ after(async () => {
   });
 });
 
-test('Express serves the Firebase-enabled page and frontend assets', async () => {
+test('Express serves the Supabase-enabled page and frontend assets', async () => {
   const pageResponse = await fetch(`${baseUrl}/`);
   const page = await pageResponse.text();
   const stylesheetResponse = await fetch(`${baseUrl}/style.css`);
-  const appScriptResponse = await fetch(`${baseUrl}/firebase-app.js`);
-  const configResponse = await fetch(`${baseUrl}/firebase-config.js`);
+  const appScriptResponse = await fetch(`${baseUrl}/supabase-app.js`);
+  const configResponse = await fetch(`${baseUrl}/api/config`);
 
   assert.equal(pageResponse.status, 200);
-  assert.match(page, /type="module" src="\/firebase-app\.js"/);
+  assert.match(page, /type="module" src="\/supabase-app\.js"/);
   assert.match(page, /id="auth-form"/);
   assert.match(page, /id="create-post-form"/);
   assert.equal(stylesheetResponse.status, 200);
   assert.equal(appScriptResponse.status, 200);
   assert.equal(configResponse.status, 200);
+  assert.deepEqual(await configResponse.json(), { url: '', anonKey: '' });
 
   const appScript = await appScriptResponse.text();
-  assert.match(appScript, /createUserWithEmailAndPassword/);
-  assert.match(appScript, /onSnapshot/);
-  assert.match(appScript, /uploadBytes/);
-  assert.match(appScript, /addDoc/);
+  assert.match(appScript, /supabase\.auth/);
+  assert.match(appScript, /postgres_changes/);
+  assert.match(appScript, /storage\.from\('post-images'\)/);
+  assert.match(appScript, /from\('posts'\)/);
   assert.doesNotMatch(appScript, /fetch\(['"]\/api\/posts/);
 });
 
@@ -49,15 +50,11 @@ test('The server no longer exposes the removed in-memory posts API', async () =>
   assert.deepEqual(await response.json(), { error: 'Not found' });
 });
 
-test('Firebase rules require authenticated post creation and owner-scoped photo uploads', async () => {
-  const firestoreRules = await fs.readFile(path.join(__dirname, '..', 'firestore.rules'), 'utf8');
-  const storageRules = await fs.readFile(path.join(__dirname, '..', 'storage.rules'), 'utf8');
+test('Supabase schema requires authenticated post creation and owner-scoped photo uploads', async () => {
+  const schema = await fs.readFile(path.join(__dirname, '..', 'supabase', 'schema.sql'), 'utf8');
 
-  assert.match(firestoreRules, /allow read: if true/);
-  assert.match(firestoreRules, /request\.auth\.uid/);
-  assert.match(firestoreRules, /http:\/\/127\\\\\.0\\\\\.0\\\\\.1:9199\/v0\/b\//);
-  assert.match(firestoreRules, /allow update, delete: if false/);
-  assert.match(storageRules, /request\.auth\.uid == userId/);
-  assert.match(storageRules, /request\.resource\.size <= 5 \* 1024 \* 1024/);
-  assert.match(storageRules, /image\/\(jpeg\|png\|webp\)/);
+  assert.match(schema, /enable row level security/i);
+  assert.match(schema, /auth\.uid\(\)\) = user_id/);
+  assert.match(schema, /post-images/);
+  assert.match(schema, /storage\.foldername\(name\).*auth\.uid/);
 });

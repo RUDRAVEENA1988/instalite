@@ -1,33 +1,6 @@
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js';
-import {
-  connectAuthEmulator,
-  createUserWithEmailAndPassword,
-  getAuth,
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  signOut,
-  updateProfile,
-} from 'https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js';
-import {
-  addDoc,
-  collection,
-  connectFirestoreEmulator,
-  getFirestore,
-  limit,
-  onSnapshot,
-  orderBy,
-  query,
-  serverTimestamp,
-} from 'https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js';
-import {
-  connectStorageEmulator,
-  deleteObject,
-  getDownloadURL,
-  getStorage,
-  ref,
-  uploadBytes,
-} from 'https://www.gstatic.com/firebasejs/12.4.0/firebase-storage.js';
-import { firebaseConfig } from './firebase-config.js';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+const supabaseConfig = await fetch('/api/config').then((response) => response.json());
+const supabase = createClient(supabaseConfig.url || 'https://invalid.supabase.co', supabaseConfig.anonKey || 'invalid-anon-key');
 
 const feedPosts = document.querySelector('#feed-posts');
 const todayDate = document.querySelector('#today-date');
@@ -144,7 +117,7 @@ function createPostCard(post) {
 
   const photo = document.createElement('img');
   photo.className = 'post-card__photo';
-  photo.src = post.imageUrl;
+  photo.src = post.image_url;
   photo.alt = `Photo shared by ${post.username}`;
   photo.loading = 'lazy';
 
@@ -246,30 +219,19 @@ function listenForPosts() {
   unsubscribePosts?.();
   showFeedMessage('Finding your little moments…', 'loading');
 
-  const postsQuery = query(collection(db, 'posts'), orderBy('timestamp', 'desc'), limit(30));
-
-  unsubscribePosts = onSnapshot(postsQuery, (snapshot) => {
-    if (snapshot.empty) {
+  supabase.from('posts').select('*').order('created_at', { ascending: false }).limit(30).then(({ data, error }) => {
+    if (error) throw error;
+    if (!data?.length) {
       showFeedMessage('Your feed is taking a little breath. Check back soon.', 'empty');
       return;
     }
-
-    const posts = snapshot.docs.map((postDocument) => {
-      const post = postDocument.data();
-      const timestamp = post.timestamp?.toDate?.();
-
-      return {
-        ...post,
-        id: postDocument.id,
-        timestamp: timestamp ? timestamp.toISOString() : '',
-      };
-    });
-
+    const posts = data.map((post) => ({ ...post, timestamp: post.created_at, userId: post.user_id }));
     feedPosts.replaceChildren(...posts.map(createPostCard));
-  }, (error) => {
+  }).catch((error) => {
     console.error('Unable to subscribe to the InstaLite feed:', error);
-    showFeedMessage('Your feed could not load. Check Firebase setup and try again.', 'error', true);
+    showFeedMessage('Your feed could not load. Check Supabase setup and try again.', 'error', true);
   });
+  unsubscribePosts = supabase.channel('posts-feed').on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, listenForPosts).subscribe();
 }
 
 function setAuthMode(mode) {
@@ -363,7 +325,7 @@ function showSuccessToast(message) {
 
 function updateSignedInProfile(user) {
   currentUser = user;
-  const username = user?.displayName || user?.email?.split('@')[0] || 'your.name';
+  const username = user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'your.name';
   const signedIn = Boolean(user);
 
   authButton.querySelector('span').textContent = signedIn ? 'Sign out' : 'Sign in';
@@ -373,19 +335,9 @@ function updateSignedInProfile(user) {
   document.querySelector('#open-auth-mobile').setAttribute('aria-label', signedIn ? 'Sign out' : 'Sign in');
 }
 
-const requiredConfigKeys = [
-  'apiKey',
-  'authDomain',
-  'projectId',
-  'storageBucket',
-  'messagingSenderId',
-  'appId',
-];
-const useEmulators = new URLSearchParams(window.location.search).has('emulator');
-const configIsReady = requiredConfigKeys.every((key) => (
-  typeof firebaseConfig[key] === 'string'
-  && firebaseConfig[key].length > 0
-)) && firebaseConfig.apiKey !== 'demo-api-key';
+const configIsReady = supabaseConfig.url.startsWith('https://')
+  && supabaseConfig.anonKey.length > 20
+  && !supabaseConfig.url.includes('your-project');
 
 if (todayDate) {
   todayDate.textContent = new Date().toLocaleDateString(undefined, {
@@ -396,26 +348,12 @@ if (todayDate) {
 }
 
 if (!configIsReady && !useEmulators) {
-  showFeedMessage('Firebase is not configured. Add your Firebase web app config to public/firebase-config.js.', 'error');
+  showFeedMessage('Supabase is not configured. Copy .env.example to .env and add your project values.', 'error');
   authButton.disabled = true;
   document.querySelector('#open-create-post').disabled = true;
   document.querySelector('#open-create-post-mobile').disabled = true;
   document.querySelector('#open-auth-mobile').disabled = true;
 } else {
-  const firebaseApp = initializeApp({
-    ...firebaseConfig,
-    projectId: useEmulators ? 'demo-instalite' : firebaseConfig.projectId,
-  });
-  const auth = getAuth(firebaseApp);
-  db = getFirestore(firebaseApp);
-  const storage = getStorage(firebaseApp);
-
-  if (useEmulators) {
-    connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
-    connectFirestoreEmulator(db, '127.0.0.1', 8080);
-    connectStorageEmulator(storage, '127.0.0.1', 9199);
-  }
-
   document.querySelector('#open-create-post').addEventListener('click', openCreatePostDialog);
   document.querySelector('#open-create-post-mobile').addEventListener('click', openCreatePostDialog);
   document.querySelector('#close-create-post').addEventListener('click', () => createDialog.close());
@@ -429,7 +367,7 @@ if (!configIsReady && !useEmulators) {
     }
 
     try {
-      await signOut(auth);
+      await supabase.auth.signOut();
       showSuccessToast('You have signed out.');
     } catch (error) {
       console.error('Unable to sign out of InstaLite:', error);
@@ -447,7 +385,7 @@ if (!configIsReady && !useEmulators) {
     openAuthDialog();
   });
 
-  onAuthStateChanged(auth, updateSignedInProfile, (error) => {
+  supabase.auth.onAuthStateChange((_event, session) => updateSignedInProfile(session?.user));
     console.error('Unable to read the InstaLite sign-in state:', error);
     authFeedback.textContent = 'Your sign-in state could not be loaded. Refresh and try again.';
   });
@@ -469,15 +407,15 @@ if (!configIsReady && !useEmulators) {
 
     try {
       if (authMode === 'sign-up') {
-        const credential = await createUserWithEmailAndPassword(auth, email, password);
-        await updateProfile(credential.user, { displayName });
+        const { data: credential, error: signUpError } = await supabase.auth.signUp({ email, password, options: { data: { display_name: displayName } } });
+        if (signUpError) throw signUpError;
         updateSignedInProfile(credential.user);
         authDialog.close();
         authForm.reset();
         setAuthMode('sign-in');
         showSuccessToast('Your account is ready.');
       } else {
-        await signInWithEmailAndPassword(auth, email, password);
+        await supabase.auth.signInWithPassword({ email, password });
         authDialog.close();
         authForm.reset();
         showSuccessToast('Welcome back.');
@@ -485,7 +423,7 @@ if (!configIsReady && !useEmulators) {
     } catch (error) {
       console.error('Unable to authenticate with InstaLite:', error);
       authFeedback.textContent = error.code === 'auth/configuration-not-found'
-        ? 'Firebase Authentication is not set up for this project. In Firebase Console, open Authentication, select Get started, then enable Email/Password under Sign-in method.'
+        ? 'Supabase Authentication is not set up for this project. In Supabase Console, open Authentication, select Get started, then enable Email/Password under Sign-in method.'
         : error.message;
     } finally {
       authSubmit.disabled = false;
@@ -525,28 +463,28 @@ if (!configIsReady && !useEmulators) {
     submitButton.disabled = true;
     submitButton.textContent = 'Uploading…';
     const extension = supportedImageTypes.get(image.type);
-    const imagePath = `posts/${currentUser.uid}/${crypto.randomUUID()}.${extension}`;
-    const imageRef = ref(storage, imagePath);
+    const imagePath = `posts/${currentUser.id}/${crypto.randomUUID()}.${extension}`;
     let imageUploaded = false;
-    let uploadStage = 'Authentication token refresh';
+    let uploadStage = 'Authentication';
 
     try {
-      await currentUser.getIdToken(true);
       uploadStage = 'Storage photo upload';
-      await uploadBytes(imageRef, image, { contentType: image.type });
+      const { error: uploadError } = await supabase.storage.from('post-images').upload(imagePath, image, { contentType: image.type, upsert: false });
+      if (uploadError) throw uploadError;
       imageUploaded = true;
-      const imageUrl = await getDownloadURL(imageRef);
-      const username = (currentUser.displayName || currentUser.email?.split('@')[0] || 'instalite-user').slice(0, 30);
+      const { data: publicImage } = supabase.storage.from('post-images').getPublicUrl(imagePath);
+      const imageUrl = publicImage.publicUrl;
+      const username = (currentUser.user_metadata?.display_name || currentUser.email?.split('@')[0] || 'instalite-user').slice(0, 30);
 
-      uploadStage = 'Firestore post creation';
-      await addDoc(collection(db, 'posts'), {
-        userId: currentUser.uid,
+      uploadStage = 'Supabase post creation';
+      const { error: postError } = await supabase.from('posts').insert({
+        user_id: currentUser.id,
         username,
         caption,
-        imageUrl,
-        imagePath,
-        timestamp: serverTimestamp(),
+        image_url: imageUrl,
+        image_path: imagePath,
       });
+      if (postError) throw postError;
 
       createPostForm.reset();
       clearImagePreview();
@@ -555,7 +493,7 @@ if (!configIsReady && !useEmulators) {
     } catch (error) {
       if (imageUploaded) {
         try {
-          await deleteObject(imageRef);
+          await supabase.storage.from('post-images').remove([imagePath]);
         } catch (cleanupError) {
           console.error('Unable to clean up an uploaded InstaLite photo:', cleanupError);
         }
@@ -563,10 +501,10 @@ if (!configIsReady && !useEmulators) {
 
       console.error('Unable to upload an InstaLite post:', error);
       const serviceName = uploadStage === 'Authentication token refresh'
-        ? 'Firebase Authentication'
+        ? 'Supabase Authentication'
         : uploadStage.startsWith('Storage')
-          ? 'Firebase Storage'
-          : 'Cloud Firestore';
+          ? 'Supabase Storage'
+          : 'Supabase database';
       createPostFeedback.textContent = error.code === 'permission-denied'
         ? `${uploadStage} was denied. Sign in again and check that ${serviceName} is configured and its rules allow authenticated users.`
         : error.message || 'Your photo could not be uploaded. Please try again.';
@@ -614,3 +552,5 @@ if (!configIsReady && !useEmulators) {
   setAuthMode('sign-in');
   listenForPosts();
 }
+
+

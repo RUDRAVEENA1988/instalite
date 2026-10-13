@@ -5,9 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "emulators": "npx firebase-tools emulators:start --project demo-instalite",
-    "deploy": "npx firebase-tools deploy --only hosting,firestore:rules,storage",
-    "test": "node --test 'test/server.test.js'",
+    "deploy": "echo Run supabase/schema.sql in the Supabase SQL Editor, then deploy the static site.",
+    "test": "node --test test/server.test.js",
     "test:browser": "playwright test"
   },
   "dependencies": {
