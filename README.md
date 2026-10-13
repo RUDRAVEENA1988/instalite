@@ -56,14 +56,11 @@ Run the tests with:
 npm test
 ```
 
-## Firebase setup guide (detailed)
+## Firebase setup guide
 
-This project is designed to work in two modes:
+For local development and trying the app's post flow, use the Firebase Emulator Suite. You do **not** need to create a Firebase account or project, configure a real Firebase app, or add a `.env` file to create test posts locally.
 
-1. Local development with the Firebase Emulator Suite using the included demo config.
-2. Real Firebase use with your own Firebase project for testing or deployment.
-
-The app does not require a `.env` file for the default local/demo setup. Firebase config values are intentionally stored in `public/firebase-config.js` because this app is a browser-based frontend and the Firebase web SDK expects a public client configuration.
+The following first three steps are only for contributors who want to connect the app to their own Firebase project. They are not required for the local emulator setup.
 
 ### 1. Create a Firebase project
 
@@ -290,39 +287,36 @@ Without `?emulator=1`, the app connects to the Firebase project configured in `p
 - Confirm the `apiKey` and `projectId` in `public/firebase-config.js` are correct.
 - If using emulators, ensure `?emulator=1` is present.
 
-#### Firestore connection issues
+### Run the emulators and create a test post
 
-- Confirm the project is selected correctly with `firebase use`.
-- Check that the Firestore database exists.
-- Ensure your Security Rules allow reads and writes for the app flow you want.
 
-#### Storage upload failures
+The repo is already configured to run Firebase Auth, Firestore, and Storage locally with the demo project. You can create a test account, sign in, and create posts (including uploading an image) without connecting to a live Firebase project.
 
-- Make sure the Storage bucket exists.
-- Confirm the file type is JPEG, PNG, or WebP.
-- Check the image size is under 5 MB.
-- Review the storage rules to confirm the upload path is authorized.
+1. Install the project dependencies from the project folder:
 
-#### Local emulator not starting
+   ```bash
+   npm install
+   ```
 
-- Install Java if it is not already installed.
-- Check that no other process is using the emulator ports.
-- Re-run the emulator command after confirming Firebase CLI dependencies are installed.
+2. In one terminal, start the Firebase emulators:
 
-### 15. Recommended workflow
+   ```bash
+   npm run emulators
+   ```
 
-For a beginner learning Firebase:
+   The first start may download emulator files. Keep this terminal open while you use the app. The emulators require Java.
 
-1. Use the emulator setup first.
-2. Confirm sign-up, sign-in, posting, and image upload work locally.
-3. Then create a real Firebase project.
-4. Replace the demo config values with the real project config.
-5. Deploy the rules.
-6. Test against the real project.
+3. In a second terminal, start the app:
 
-This keeps the setup simple and avoids accidentally exposing production data while learning.
+   ```bash
+   npm start
+   ```
 
-For local-only work, the `demo-instalite` project configuration is prefilled. The emulator rules are the same checked-in rules used for deployment.
+4. Open <http://localhost:3000/?emulator=1>, create an account in the app, sign in, and use the create-post control to share a test image and caption.
+
+The Emulator UI is available at <http://localhost:4000>. Emulator data is local and disposable; it is not uploaded to or copied into your Firebase project. The placeholder values in `public/firebase-config.js` are intended for this emulator workflow.
+
+To use a real Firebase project instead, completing the first three steps above is only the client-config portion; the real project's Authentication, Firestore, Storage, and Security Rules must also be configured before live posting will work. Never commit service-account files, private keys, or other privileged credentials.
 
 ## Data model
 
