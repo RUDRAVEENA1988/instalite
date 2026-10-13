@@ -484,7 +484,9 @@ if (!configIsReady && !useEmulators) {
       }
     } catch (error) {
       console.error('Unable to authenticate with InstaLite:', error);
-      authFeedback.textContent = error.message;
+      authFeedback.textContent = error.code === 'auth/configuration-not-found'
+        ? 'Firebase Authentication is not set up for this project. In Firebase Console, open Authentication, select Get started, then enable Email/Password under Sign-in method.'
+        : error.message;
     } finally {
       authSubmit.disabled = false;
     }

@@ -1,10 +1,10 @@
 export const firebaseConfig = {
-  apiKey: 'demo-api-key',
-  authDomain: 'localhost',
-  projectId: 'demo-instalite',
-  storageBucket: 'demo-instalite.firebasestorage.app',
-  messagingSenderId: '000000000000',
-  appId: '1:000000000000:web:demo',
+  apiKey: 'YOUR_API_KEY',
+  authDomain: 'your-project.firebaseapp.com',
+  projectId: 'your-project',
+  storageBucket: 'your-project.firebasestorage.app',
+  messagingSenderId: '123456789012',
+  appId: '1:123456789012:web:abc123def456',
 };
 
-export {firebaseConfig};
+export { firebaseConfig};
