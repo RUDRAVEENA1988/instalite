@@ -75,6 +75,10 @@ a:focus-visible {
   letter-spacing: -1.1px;
 }
 
+.sidebar .brand {
+  gap: 10px;
+}
+
 .brand__icon {
   width: 32px;
   height: 32px;
@@ -88,31 +92,42 @@ a:focus-visible {
   height: 30px;
 }
 
+.sidebar .brand__icon {
+  width: 30px;
+  height: 30px;
+}
+
+.sidebar .brand__icon svg {
+  width: 29px;
+  height: 29px;
+}
+
 .navigation {
-  margin-top: 54px;
+  margin-top: 50px;
   display: grid;
-  gap: 8px;
+  gap: 5px;
 }
 
 .navigation__link {
   position: relative;
-  min-height: 49px;
-  padding: 0 14px;
+  min-height: 45px;
+  padding: 0 8px;
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 13px;
   border: 0;
-  border-radius: 11px;
   background: transparent;
   color: #686c78;
+  font-size: 13px;
   text-align: left;
   text-decoration: none;
-  transition: background-color 160ms ease, color 160ms ease;
+  transition: color 160ms ease, transform 160ms ease;
 }
 
-a.navigation__link:hover {
-  background: #f5f1ef;
-  color: var(--ink);
+a.navigation__link:hover,
+.navigation__link:not(:disabled):hover {
+  color: var(--pink-dark);
+  transform: translateX(2px);
 }
 
 .navigation__link:disabled {
@@ -121,9 +136,12 @@ a.navigation__link:hover {
 }
 
 .navigation__link--active {
-  background: var(--peach);
-  color: #d45979;
+  color: var(--pink-dark);
   font-weight: 650;
+}
+
+.navigation__link--active:hover {
+  color: var(--pink-dark);
 }
 
 .navigation__link svg {
@@ -137,30 +155,24 @@ a.navigation__link:hover {
   stroke-width: 1.7;
 }
 
-.navigation__link:first-child svg {
-  fill: none;
-}
-
-.navigation__link img,
-.avatar {
+.navigation__link img {
+  width: 24px;
+  height: 24px;
   flex: 0 0 auto;
   object-fit: cover;
   border-radius: 50%;
 }
 
-.navigation__link img {
-  outline: 1.5px solid #f3c8d3;
+.navigation__link:focus-visible {
   outline-offset: 2px;
 }
 
 .navigation__soon {
   margin-left: auto;
-  padding: 4px 7px;
-  border-radius: 20px;
-  background: #f3f0eb;
-  color: #888277;
+  color: var(--pink-dark);
   font-size: 10px;
-  letter-spacing: 0.3px;
+  font-weight: 650;
+  letter-spacing: 0.55px;
   text-transform: uppercase;
 }
 
@@ -168,7 +180,7 @@ a.navigation__link:hover {
   margin-top: auto;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   color: #9a98a0;
   font-size: 12px;
 }
