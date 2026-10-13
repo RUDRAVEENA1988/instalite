@@ -54,6 +54,9 @@ test('Supabase schema requires authenticated post creation and owner-scoped phot
   const schema = await fs.readFile(path.join(__dirname, '..', 'supabase', 'schema.sql'), 'utf8');
 
   assert.match(schema, /enable row level security/i);
+  assert.match(schema, /create table if not exists public\.profiles/);
+  assert.match(schema, /on_auth_user_created/);
+  assert.match(schema, /auth\.users/);
   assert.match(schema, /auth\.uid\(\)\) = user_id/);
   assert.match(schema, /post-images/);
   assert.match(schema, /storage\.foldername\(name\).*auth\.uid/);

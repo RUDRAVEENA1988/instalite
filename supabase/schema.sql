@@ -1,4 +1,44 @@
 -- Run this in Supabase SQL Editor before using the app.
+-- Supabase Auth stores email/password credentials in auth.users. The profiles
+-- table stores the app-facing account details without duplicating passwords.
+create table if not exists public.profiles (
+  id uuid primary key references auth.users(id) on delete cascade,
+  username text not null check (char_length(username) between 1 and 30),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.profiles enable row level security;
+drop policy if exists "Profiles are publicly readable" on public.profiles;
+create policy "Profiles are publicly readable" on public.profiles for select using (true);
+drop policy if exists "Users can create their own profile" on public.profiles;
+create policy "Users can create their own profile" on public.profiles for insert
+  with check ((select auth.uid()) = id);
+drop policy if exists "Users can update their own profile" on public.profiles;
+create policy "Users can update their own profile" on public.profiles for update
+  using ((select auth.uid()) = id) with check ((select auth.uid()) = id);
+
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer set search_path = public
+as $$
+begin
+  insert into public.profiles (id, username)
+  values (
+    new.id,
+    left(coalesce(new.raw_user_meta_data ->> 'display_name', split_part(new.email, '@', 1), 'instalite-user'), 30)
+  )
+  on conflict (id) do nothing;
+  return new;
+end;
+$$;
+
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute procedure public.handle_new_user();
+
 create table if not exists public.posts (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
