@@ -20,6 +20,10 @@ const port = process.env.PORT || 3000;
 const publicDirectory = path.join(__dirname, 'public');
 app.use(express.static(publicDirectory));
 app.get('/api/config', (request, response) => {
+  // Reload on request so adding or changing .env does not require a stale
+  // process restart during local development.
+  loadEnvFile();
+  response.set('Cache-Control', 'no-store');
   response.json({
     url: process.env.SUPABASE_URL || '',
     anonKey: process.env.SUPABASE_ANON_KEY || '',
@@ -33,6 +37,9 @@ app.use((request, response) => {
 if (require.main === module) {
   app.listen(port, () => {
     console.log(`InstaLite is running at http://localhost:${port}`);
+    if (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY) {
+      console.warn('Supabase environment is missing. Add SUPABASE_URL and SUPABASE_ANON_KEY to .env.');
+    }
   });
 }
 

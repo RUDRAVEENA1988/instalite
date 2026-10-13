@@ -15,7 +15,6 @@ The 30-minute estimate assumes you already have a GitHub account, Git, Node.js, 
 | 22–25 min | Review your changes and run the relevant test |
 | 25–30 min | Push your branch and open a pull request |
 
-For a first contribution, a small documentation or styling improvement is a great choice. You do **not** need to create a Supabase project, add a `.env` file, or start the Supabase emulators just to update documentation or make a simple frontend change.
 
 ## Before you start
 
@@ -158,7 +157,6 @@ npm start
 
 Open <http://localhost:3000/>. Stop the server when you are done by returning to the terminal and pressing **Ctrl+C**.
 
-The Supabase emulators are only needed when you are changing or testing Supabase behavior. They require Java and may download emulator files the first time, so they can take longer than the 30-minute first-PR target. See the [README setup guide](./README.md#install-and-run-with-local-emulators) if your change needs them. You do not need a real Supabase project for the included local emulator setup.
 
 ## Step 8: Commit your change
 
@@ -228,7 +226,6 @@ That’s it—you have sent your first pull request! A maintainer may ask a ques
 - **`remote upstream already exists`:** The original repository is already connected. Check it with `git remote -v` and continue.
 - **`src refspec ... does not match any`:** Check your branch name with `git branch --show-current`, then use that name in your `git push` command.
 - **Git says there are conflicts:** Don’t guess or delete files. Ask for help and include the full error message.
-- **The app opens but Supabase features do not work:** The local app server alone does not start Supabase. Follow the emulator instructions in the [README](./README.md#install-and-run-with-local-emulators) only if your contribution needs Supabase behavior.
 
 ## After your first pull request
 
@@ -245,4 +242,5 @@ git switch -c another-small-change
 If you have already made local changes, finish or save them before switching branches. Do not merge `upstream/main` into a branch that contains unfinished work unless you know you need to update that branch.
 
 Thanks for helping make InstaLite better—and for making it easier for the next beginner to contribute!
+
 
