@@ -2,7 +2,7 @@
 
 InstaLite is a small Instagram-inspired photo-sharing application and learning project. It is designed to help beginners see how a browser interface works with authentication, a PostgreSQL database, image storage, and realtime updates.
 
-The current application uses **Supabase**, not Firebase. The interface is built with HTML, CSS, and vanilla JavaScript. Express serves the files locally and returns the public Supabase client configuration; the browser then communicates directly with Supabase.
+The current application uses **Supabase**. The interface is built with HTML, CSS, and vanilla JavaScript. Express serves the files locally and returns the public Supabase client configuration; the browser then communicates directly with Supabase.
 
 ## Features
 
