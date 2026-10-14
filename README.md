@@ -20,16 +20,7 @@ Search, Explore, Notifications, following, likes, comments, bookmarks, story pla
 
 ## How the application works
 
-```mermaid
-flowchart LR
-  Browser[Browser: HTML, CSS, JavaScript] -->|GET /| Express[Express local server]
-  Browser -->|GET /api/config| Express
-  Express -->|SUPABASE_URL and public key| Browser
-  Browser -->|Sign up and sign in| Auth[Supabase Auth]
-  Browser -->|Upload image| Storage[Supabase Storage: post-images]
-  Browser -->|Read and insert posts| DB[Supabase PostgreSQL: public.posts]
-  DB -->|Realtime changes| Browser
-```
+![InstaLite application architecture](docs/images/Blank%20diagram.png)
 
 Express does **not** receive post or image-upload requests. It serves the static application and the `GET /api/config` endpoint. The browser loads Supabase JavaScript v2 from `esm.sh`, reads `/api/config`, and uses the public client key to call Supabase Auth, Storage, and PostgreSQL directly.
 
